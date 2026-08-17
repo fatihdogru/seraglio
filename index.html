@@ -109,10 +109,119 @@
 
   .logo .mark { color: var(--gold); font-size: 0.8em; }
 
+  .nav-left { display: flex; align-items: center; gap: 28px; }
+
+  /* ================= HAMBURGER + SIDEBAR (MOBİL) ================= */
+  .menu-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    margin-left: -10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  .menu-btn span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--ink);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .menu-btn.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .menu-btn.open span:nth-child(2) { opacity: 0; }
+  .menu-btn.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+  .menu-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 18, 15, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s;
+    z-index: 30;
+  }
+
+  .menu-backdrop.open { opacity: 1; visibility: visible; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(320px, 84vw);
+    background: var(--bg);
+    border-right: 1px solid var(--gold-soft);
+    z-index: 40;
+    transform: translateX(-100%);
+    transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 28px 32px;
+    overflow-y: auto;
+  }
+
+  .sidebar.open { transform: translateX(0); }
+
+  .sidebar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+  }
+
+  .sidebar-head .logo {
+    font-size: 1.1rem;
+    text-indent: 0;
+    letter-spacing: 0.3em;
+    text-align: left;
+  }
+
+  .sidebar-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.05rem;
+    color: var(--muted);
+    padding: 10px;
+    margin-right: -10px;
+  }
+
+  .sidebar-links { display: flex; flex-direction: column; }
+
+  .sidebar-links > a {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(176, 138, 53, 0.16);
+  }
+
+  .sidebar-links > a:active { color: var(--gold); }
+
+  .sidebar-links .aux { margin-top: 30px; display: flex; flex-direction: column; }
+
+  .sidebar-links .aux a {
+    font-size: 0.74rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 11px 0;
+  }
+
   @media (max-width: 860px) {
-    .nav-links.left { display: none; }
-    .nav-row { grid-template-columns: auto 1fr; }
-    .logo { text-align: left; text-indent: 0; letter-spacing: 0.3em; }
+    .nav-links { display: none; }
+    .menu-btn { display: inline-flex; }
+    .logo { letter-spacing: 0.3em; text-indent: 0.3em; }
+  }
+
+  @media (min-width: 861px) {
+    .sidebar, .menu-backdrop { display: none; }
   }
 
   /* ================= KAYDIRMALI VİDEO ================= */
@@ -660,11 +769,8 @@
   /* ================= TELEFON ================= */
   @media (max-width: 600px) {
     .announce { font-size: 0.6rem; letter-spacing: 0.14em; padding: 8px 12px; }
-    .nav-row { padding: 14px 20px; }
+    .nav-row { padding: 10px 20px; }
     .logo { font-size: 1.15rem; }
-    .nav-links { gap: 16px; }
-    /* Dar ekranda sağda yalnızca "Bag" kalır */
-    .nav-links.right a:nth-child(-n + 2) { display: none; }
 
     .section { padding: 64px 20px; }
     .scroll-hint { bottom: 24px; }
@@ -695,11 +801,16 @@
   <header id="siteHeader">
     <div class="announce">Complimentary worldwide shipping on orders over $500</div>
     <div class="nav-row">
-      <nav class="nav-links left">
-        <a href="#collection">Collections</a>
-        <a href="#heritage">Heritage</a>
-        <a href="#">Journal</a>
-      </nav>
+      <div class="nav-left">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="nav-links left">
+          <a href="#collection">Collections</a>
+          <a href="#heritage">Heritage</a>
+          <a href="#">Journal</a>
+        </nav>
+      </div>
       <a class="logo" href="#"><span class="mark">✦</span> SERAGLIO</a>
       <nav class="nav-links right">
         <a href="#">Search</a>
@@ -708,6 +819,25 @@
       </nav>
     </div>
   </header>
+
+  <!-- ================= MOBİL SIDEBAR ================= -->
+  <div class="menu-backdrop" id="menuBackdrop"></div>
+  <aside class="sidebar" id="sidebar" aria-hidden="true">
+    <div class="sidebar-head">
+      <a class="logo" href="#"><span class="mark">✦</span> SERAGLIO</a>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+    </div>
+    <nav class="sidebar-links">
+      <a href="#collection">Collections</a>
+      <a href="#heritage">Heritage</a>
+      <a href="#">Journal</a>
+      <div class="aux">
+        <a href="#">Search</a>
+        <a href="#">Account</a>
+        <a href="#">Bag (0)</a>
+      </div>
+    </nav>
+  </aside>
 
   <!-- ================= KAYDIRMALI VİDEO ================= -->
   <section class="video-scroll" id="videoScroll">
@@ -1122,6 +1252,28 @@
         <div class="p-price">${p.price}</div>
       </a>`)
     .join("");
+
+  /* ---------- Mobil menü ---------- */
+  const menuBtn = document.getElementById("menuBtn");
+  const sidebarEl = document.getElementById("sidebar");
+  const menuBackdrop = document.getElementById("menuBackdrop");
+
+  function setMenu(open) {
+    menuBtn.classList.toggle("open", open);
+    sidebarEl.classList.toggle("open", open);
+    menuBackdrop.classList.toggle("open", open);
+    menuBtn.setAttribute("aria-expanded", String(open));
+    sidebarEl.setAttribute("aria-hidden", String(!open));
+    document.body.style.overflow = open ? "hidden" : "";
+  }
+
+  menuBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setMenu(!sidebarEl.classList.contains("open"));
+  });
+  menuBackdrop.addEventListener("click", () => setMenu(false));
+  document.getElementById("sidebarClose").addEventListener("click", () => setMenu(false));
+  sidebarEl.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
 
   /* ---------- Kaydırınca beliren bölümler ---------- */
   const observer = new IntersectionObserver(
