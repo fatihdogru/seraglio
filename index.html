@@ -26,6 +26,7 @@
     color: var(--ink);
     font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
   }
 
   a { color: inherit; text-decoration: none; }
@@ -125,6 +126,8 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    /* Mobilde adres çubuğu açılıp kapanınca zıplamayı önler */
+    height: 100dvh;
     width: 100%;
     overflow: hidden;
   }
@@ -215,8 +218,9 @@
 
   .hotspot .dot {
     display: block;
-    width: 30px;
-    height: 30px;
+    /* Dokunma alanı: görsel nokta küçük kalır, tıklanabilir alan geniştir */
+    width: 40px;
+    height: 40px;
     border: none;
     background: transparent;
     cursor: pointer;
@@ -652,6 +656,37 @@
     .section { padding: 80px 24px; }
     footer { padding: 64px 24px 32px; }
   }
+
+  /* ================= TELEFON ================= */
+  @media (max-width: 600px) {
+    .announce { font-size: 0.6rem; letter-spacing: 0.14em; padding: 8px 12px; }
+    .nav-row { padding: 14px 20px; }
+    .logo { font-size: 1.15rem; }
+    .nav-links { gap: 16px; }
+    /* Dar ekranda sağda yalnızca "Bag" kalır */
+    .nav-links.right a:nth-child(-n + 2) { display: none; }
+
+    .section { padding: 64px 20px; }
+    .scroll-hint { bottom: 24px; }
+
+    .card { width: min(250px, calc(100vw - 36px)); }
+
+    .products-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 36px;
+    }
+    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 24px 16px; }
+
+    .story .inner { gap: 28px; }
+    .values .inner { gap: 36px; }
+
+    .newsletter input { padding: 13px 18px; font-size: 0.85rem; }
+    .newsletter button { padding: 0 18px; }
+
+    .foot-grid { gap: 36px 24px; }
+  }
 </style>
 </head>
 <body>
@@ -902,16 +937,61 @@
     document.querySelectorAll(".hotspot.active").forEach((h) => h.classList.remove("active"));
   });
 
-  /* ---------- Kareleri önden yükle ---------- */
+  /* ---------- Kareleri önden yükle ----------
+     Mobil bağlantılarda tüm kareleri beklemek uzun sürer: loader ilk ~20
+     kareden sonra kalkar, eksik kareler yerine en yakın yüklenen çizilir. */
+  const LOADER_MIN_FRAMES = Math.min(20, FRAME_COUNT);
   for (let i = 0; i < FRAME_COUNT; i++) {
     const img = new Image();
     img.src = framePath(i);
     img.onload = () => {
       loadedCount++;
-      if (loadedCount === 1) drawFrame(0);
-      if (loadedCount === FRAME_COUNT) loader.classList.add("hidden");
+      drawnFrame = -1; // yeni kare geldi; bir sonraki tick daha iyi kareyle çizsin
+      if (loadedCount >= LOADER_MIN_FRAMES) loader.classList.add("hidden");
     };
     frames[i] = img;
+  }
+
+  function frameReady(i) {
+    const img = frames[i];
+    return !!(img && img.complete && img.naturalWidth);
+  }
+
+  function nearestReadyFrame(index) {
+    if (frameReady(index)) return index;
+    for (let d = 1; d < FRAME_COUNT; d++) {
+      if (index - d >= 0 && frameReady(index - d)) return index - d;
+      if (index + d < FRAME_COUNT && frameReady(index + d)) return index + d;
+    }
+    return -1;
+  }
+
+  /* ---------- Mobil kamera odağı ----------
+     Dikey ekranda "cover" kırpması görüntünün yanlarını atar; kırpma
+     penceresi bu odak noktasına doğru kayar ki ürünler ekranda kalsın.
+     [kareNo, odakX] — ürün keyframe'lerinin ağırlık merkezini izler. */
+  const CAMERA_X = [[0, 0.67], [31, 0.74], [66, 0.60], [102, 0.41], [120, 0.45]];
+
+  function cameraXAt(f) {
+    if (f <= CAMERA_X[0][0]) return CAMERA_X[0][1];
+    for (let i = 0; i < CAMERA_X.length - 1; i++) {
+      const [f1, x1] = CAMERA_X[i];
+      const [f2, x2] = CAMERA_X[i + 1];
+      if (f >= f1 && f <= f2) return x1 + (x2 - x1) * ((f - f1) / (f2 - f1));
+    }
+    return CAMERA_X[CAMERA_X.length - 1][1];
+  }
+
+  /* Cover yerleşimi: kırpma arttıkça (dar ekran) odak devreye girer,
+     geniş ekranda görüntü ortalanmış kalır. */
+  function coverLayout(img, cw, ch, f) {
+    const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    const t = Math.min(Math.max((w / cw - 1.15) / 0.6, 0), 1);
+    const fx = 0.5 + (cameraXAt(f) - 0.5) * t;
+    const ox = Math.min(0, Math.max(cw - w, cw / 2 - fx * w));
+    return { w, h, ox, oy: (ch - h) / 2 };
   }
 
   function resizeCanvas() {
@@ -925,31 +1005,26 @@
   }
 
   function drawFrame(index) {
-    const img = frames[index];
-    if (!img || !img.complete || !img.naturalWidth) return;
+    const ready = nearestReadyFrame(index);
+    if (ready === -1) return;
+    const img = frames[ready];
 
-    const cw = canvas.width, ch = canvas.height;
-    const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-    const w = img.naturalWidth * scale;
-    const h = img.naturalHeight * scale;
-
-    ctx.clearRect(0, 0, cw, ch);
-    ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+    const L = coverLayout(img, canvas.width, canvas.height, index);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, L.ox, L.oy, L.w, L.h);
     drawnFrame = index;
   }
 
   /* Video karesindeki oransal noktayı ekran pikseline çevir
      (canvas "cover" ile kırpıldığı için aynı dönüşüm uygulanır) */
-  function frameToScreen(x, y) {
-    const img = frames[0];
+  function frameToScreen(x, y, f) {
     const cw = sticky.clientWidth, ch = sticky.clientHeight;
-    if (!img || !img.naturalWidth) return { x: -9999, y: -9999 };
-    const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-    const w = img.naturalWidth * scale;
-    const h = img.naturalHeight * scale;
+    const ri = nearestReadyFrame(0);
+    if (ri === -1) return { x: -9999, y: -9999 };
+    const L = coverLayout(frames[ri], cw, ch, f);
     return {
-      x: (cw - w) / 2 + x * w,
-      y: (ch - h) / 2 + y * h,
+      x: L.ox + x * L.w,
+      y: L.oy + y * L.h,
     };
   }
 
@@ -991,7 +1066,16 @@
       }
 
       const pos = positionAt(p, f);
-      const s = frameToScreen(pos.x, pos.y);
+      const s = frameToScreen(pos.x, pos.y, f);
+
+      // Kırpma yüzünden ekran dışında kalan nokta gizlenir
+      if (s.x < 14 || s.x > cw - 14) {
+        el.style.opacity = 0;
+        el.style.pointerEvents = "none";
+        el.classList.remove("active");
+        return;
+      }
+
       el.style.left = s.x + "px";
       el.style.top = s.y + "px";
 
