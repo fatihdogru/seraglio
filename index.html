@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seraglio — Ottoman Heritage Jewelry</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ctext x='2' y='19' font-size='19' fill='%23b08a35'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #faf8f4;
+    --bg-deep: #f1ece2;
+    --ink: #1c1a17;
+    --muted: rgba(28, 26, 23, 0.62);
+    --gold: #b08a35;
+    --gold-bright: #c9a24b;
+    --gold-soft: rgba(176, 138, 53, 0.4);
+    --serif: Georgia, "Times New Roman", serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ================= HEADER ================= */
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    transition: background 0.35s ease, box-shadow 0.35s ease;
+  }
+
+  .announce {
+    background: var(--ink);
+    color: #e8dfc8;
+    text-align: center;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    max-height: 40px;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.35s ease;
+  }
+
+  header.scrolled .announce { max-height: 0; padding: 0 16px; }
+
+  header.scrolled .nav-row {
+    background: rgba(250, 248, 244, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 1px 0 rgba(176, 138, 53, 0.25);
+  }
+
+  .nav-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 18px 40px;
+    transition: background 0.35s ease, box-shadow 0.35s ease;
+  }
+
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links.right { justify-content: flex-end; }
+
+  .nav-links a {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    position: relative;
+    padding-bottom: 3px;
+  }
+
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .nav-links a:hover::after { transform: scaleX(1); }
+
+  .logo {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    letter-spacing: 0.42em;
+    text-indent: 0.42em;
+    text-align: center;
+    color: var(--ink);
+  }
+
+  .logo .mark { color: var(--gold); font-size: 0.8em; }
+
+  @media (max-width: 860px) {
+    .nav-links.left { display: none; }
+    .nav-row { grid-template-columns: auto 1fr; }
+    .logo { text-align: left; text-indent: 0; letter-spacing: 0.3em; }
+  }
+
+  /* ================= KAYDIRMALI VİDEO ================= */
+  .video-scroll {
+    /* Bu yükseklik, videonun ne kadar kaydırmayla oynayacağını belirler */
+    height: 500vh;
+    position: relative;
+  }
+
+  .video-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .video-sticky canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    transition: opacity 0.5s ease;
+    z-index: 6;
+  }
+
+  .loader.hidden { opacity: 0; pointer-events: none; }
+
+  .loader span {
+    font-size: 0.8rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  .scroll-hint .mouse {
+    width: 26px;
+    height: 42px;
+    border: 2px solid rgba(28, 26, 23, 0.4);
+    border-radius: 14px;
+    position: relative;
+  }
+
+  .scroll-hint .mouse::after {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    width: 4px;
+    height: 8px;
+    margin-left: -2px;
+    border-radius: 2px;
+    background: rgba(28, 26, 23, 0.5);
+    animation: wheel 1.6s ease-in-out infinite;
+  }
+
+  @keyframes wheel {
+    0%   { transform: translateY(0);    opacity: 1; }
+    70%  { transform: translateY(12px); opacity: 0; }
+    100% { transform: translateY(0);    opacity: 0; }
+  }
+
+  .progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    transform-origin: left;
+    transform: scaleX(0);
+    background: var(--gold-bright);
+    box-shadow: 0 0 12px var(--gold-bright);
+    z-index: 5;
+  }
+
+  /* ================= ÜRÜN NOKTALARI ================= */
+  .hotspot {
+    position: absolute;
+    z-index: 4;
+    transform: translate(-50%, -50%);
+  }
+
+  .hotspot .dot {
+    display: block;
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+  }
+
+  .hotspot .dot::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 11px;
+    height: 11px;
+    margin: -5.5px 0 0 -5.5px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow:
+      0 0 6px rgba(255, 255, 255, 0.95),
+      0 0 16px rgba(255, 255, 255, 0.75),
+      0 0 30px rgba(201, 162, 75, 0.55),
+      0 1px 4px rgba(0, 0, 0, 0.25);
+  }
+
+  .hotspot .dot::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 11px;
+    height: 11px;
+    margin: -5.5px 0 0 -5.5px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+    animation: pulse 2s ease-out infinite;
+  }
+
+  @keyframes pulse {
+    0%   { transform: scale(1);   opacity: 0.9; }
+    100% { transform: scale(3.2); opacity: 0; }
+  }
+
+  .hotspot:hover .dot::after,
+  .hotspot.active .dot::after { animation-duration: 1s; }
+
+  /* ================= ÜRÜN KARTI ================= */
+  .card {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 16px);
+    transform: translateX(-50%) translateY(8px);
+    width: 260px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--gold-soft);
+    border-radius: 12px;
+    padding: 12px 12px 16px;
+    color: var(--ink);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+    pointer-events: none;
+  }
+
+  .hotspot:hover .card,
+  .hotspot.active .card {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+
+  .hotspot.below .card {
+    bottom: auto;
+    top: calc(100% + 16px);
+    transform: translateX(-50%) translateY(-8px);
+  }
+  .hotspot.below:hover .card,
+  .hotspot.below.active .card { transform: translateX(-50%) translateY(0); }
+
+  .hotspot.shift-left .card  { left: auto; right: -16px; transform: translateY(8px); }
+  .hotspot.shift-left:hover .card,
+  .hotspot.shift-left.active .card { transform: translateY(0); }
+  .hotspot.shift-right .card { left: -16px; transform: translateY(8px); }
+  .hotspot.shift-right:hover .card,
+  .hotspot.shift-right.active .card { transform: translateY(0); }
+
+  .card .photo {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(176, 138, 53, 0.25);
+    background: #fff;
+    margin-bottom: 12px;
+  }
+
+  .card .body { padding: 0 8px; }
+
+  .card .kicker {
+    font-size: 0.62rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #8a6d2f;
+    margin-bottom: 6px;
+  }
+
+  .card h3 {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin-bottom: 6px;
+  }
+
+  .card .desc {
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: rgba(28, 26, 23, 0.65);
+    margin-bottom: 12px;
+  }
+
+  .card .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(176, 138, 53, 0.3);
+    padding-top: 10px;
+  }
+
+  .card .price {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+  }
+
+  .card .buy {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8a6d2f;
+  }
+
+  .card .buy:hover { color: #5e4a1e; }
+
+  /* ================= GENEL BÖLÜM DÜZENİ ================= */
+  .section { padding: 110px 40px; }
+  .section .inner { max-width: 1140px; margin: 0 auto; }
+
+  .eyebrow {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .section h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    margin-bottom: 18px;
+  }
+
+  .section .lede {
+    font-size: 1.02rem;
+    line-height: 1.8;
+    color: var(--muted);
+    max-width: 560px;
+  }
+
+  /* Görünürken yumuşakça belirme */
+  .reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ================= ÜRÜN VİTRİNİ ================= */
+  .products-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  .products-head .all {
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--gold-soft);
+    padding-bottom: 4px;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 32px 28px;
+  }
+
+  .product {
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  .product:hover { transform: translateY(-6px); }
+
+  .product .frame {
+    background: #fff;
+    border: 1px solid rgba(176, 138, 53, 0.22);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    transition: box-shadow 0.35s ease;
+  }
+
+  .product:hover .frame { box-shadow: 0 18px 40px rgba(28, 26, 23, 0.12); }
+
+  .product img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .product:hover img { transform: scale(1.05); }
+
+  .product .p-name {
+    font-family: var(--serif);
+    font-size: 1.02rem;
+    margin-bottom: 4px;
+  }
+
+  .product .p-price {
+    font-size: 0.85rem;
+    color: var(--gold);
+    font-family: var(--serif);
+  }
+
+  /* ================= HİKÂYE ================= */
+  .story { background: var(--bg-deep); }
+
+  .story .inner {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 72px;
+    align-items: center;
+  }
+
+  .story figure {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(176, 138, 53, 0.25);
+  }
+
+  .story img { display: block; width: 100%; }
+
+  .story .text p {
+    font-size: 1rem;
+    line-height: 1.85;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+
+  .story .more {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-bottom: 1px solid var(--gold-soft);
+    padding-bottom: 4px;
+  }
+
+  @media (max-width: 860px) {
+    .story .inner { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  /* ================= DEĞERLER ================= */
+  .values .inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 48px;
+    text-align: center;
+  }
+
+  .values .glyph {
+    font-size: 1.3rem;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  .values h3 {
+    font-family: var(--serif);
+    font-size: 1.12rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .values p {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  /* ================= BÜLTEN ================= */
+  .newsletter {
+    background: var(--ink);
+    color: #efe9dc;
+    text-align: center;
+  }
+
+  .newsletter .eyebrow { color: var(--gold-bright); }
+
+  .newsletter h2 { color: #f5f1e8; }
+
+  .newsletter p {
+    color: rgba(239, 233, 220, 0.6);
+    max-width: 460px;
+    margin: 0 auto 36px;
+    line-height: 1.8;
+    font-size: 0.95rem;
+  }
+
+  .newsletter form {
+    display: flex;
+    max-width: 440px;
+    margin: 0 auto;
+    border: 1px solid rgba(201, 162, 75, 0.45);
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .newsletter input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #f5f1e8;
+    font-size: 0.9rem;
+    padding: 15px 24px;
+    font-family: inherit;
+  }
+
+  .newsletter input::placeholder { color: rgba(239, 233, 220, 0.4); }
+
+  .newsletter button {
+    background: var(--gold-bright);
+    color: #1c1a17;
+    border: none;
+    cursor: pointer;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0 28px;
+    font-family: inherit;
+    transition: background 0.3s ease;
+  }
+
+  .newsletter button:hover { background: #d9b45e; }
+
+  /* ================= FOOTER ================= */
+  footer {
+    background: #14120f;
+    color: rgba(239, 233, 220, 0.65);
+    padding: 80px 40px 36px;
+  }
+
+  footer .inner { max-width: 1140px; margin: 0 auto; }
+
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    padding-bottom: 56px;
+    border-bottom: 1px solid rgba(201, 162, 75, 0.2);
+  }
+
+  .foot-brand .logo { color: #f5f1e8; font-size: 1.3rem; text-align: left; text-indent: 0; margin-bottom: 14px; }
+
+  .foot-brand p {
+    font-size: 0.85rem;
+    line-height: 1.75;
+    max-width: 300px;
+    color: rgba(239, 233, 220, 0.5);
+  }
+
+  .foot-col h4 {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+    margin-bottom: 18px;
+    font-weight: 600;
+  }
+
+  .foot-col a {
+    display: block;
+    font-size: 0.85rem;
+    padding: 5px 0;
+    color: rgba(239, 233, 220, 0.65);
+    transition: color 0.25s ease;
+  }
+
+  .foot-col a:hover { color: #f5f1e8; }
+
+  .foot-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 28px;
+    font-size: 0.75rem;
+    color: rgba(239, 233, 220, 0.4);
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 860px) {
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+    .section { padding: 80px 24px; }
+    footer { padding: 64px 24px 32px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header id="siteHeader">
+    <div class="announce">Complimentary worldwide shipping on orders over $500</div>
+    <div class="nav-row">
+      <nav class="nav-links left">
+        <a href="#collection">Collections</a>
+        <a href="#heritage">Heritage</a>
+        <a href="#">Journal</a>
+      </nav>
+      <a class="logo" href="#"><span class="mark">✦</span> SERAGLIO</a>
+      <nav class="nav-links right">
+        <a href="#">Search</a>
+        <a href="#">Account</a>
+        <a href="#">Bag (0)</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= KAYDIRMALI VİDEO ================= -->
+  <section class="video-scroll" id="videoScroll">
+    <div class="video-sticky" id="videoSticky">
+      <canvas id="scrubCanvas"></canvas>
+
+      <div class="loader" id="loader"><span>Seraglio</span></div>
+
+      <div class="scroll-hint" id="scrollHint">
+        <div class="mouse"></div>
+      </div>
+
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </section>
+
+  <!-- ================= ÜRÜN VİTRİNİ ================= -->
+  <section class="section" id="collection">
+    <div class="inner">
+      <div class="products-head reveal">
+        <div>
+          <span class="eyebrow">Ottoman Heritage Jewelry</span>
+          <h2>The Imperial Collection</h2>
+          <p class="lede">
+            Five pieces in 24k gold vermeil, drawn from the goldwork of the
+            Ottoman court — filigree, coin seals and Basra pearls, reimagined
+            for today.
+          </p>
+        </div>
+        <a class="all" href="#">View all pieces</a>
+      </div>
+      <div class="products-grid" id="productsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ================= HİKÂYE ================= -->
+  <section class="section story" id="heritage">
+    <div class="inner">
+      <figure class="reveal">
+        <img src="assets/story.webp" alt="Model wearing the Imperial Collection rings">
+      </figure>
+      <div class="text reveal">
+        <span class="eyebrow">Our Heritage</span>
+        <h2>Goldwork of the Court</h2>
+        <p>
+          In the ateliers of the old city, goldsmiths spent lifetimes on a
+          single craft — pierced filigree fine as lace, coin seals struck by
+          hand, pearls carried up the Tigris from Basra.
+        </p>
+        <p>
+          Seraglio continues that lineage. Each piece is cast, chased and
+          finished by hand in Istanbul, in small series, using the same
+          techniques the court once kept behind palace walls.
+        </p>
+        <a class="more" href="#">Discover the atelier</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DEĞERLER ================= -->
+  <section class="section values">
+    <div class="inner">
+      <div class="reveal">
+        <div class="glyph">✦</div>
+        <h3>24k Gold Vermeil</h3>
+        <p>A thick layer of 24k gold over sterling silver — hypoallergenic and made to be worn daily.</p>
+      </div>
+      <div class="reveal">
+        <div class="glyph">❖</div>
+        <h3>Handcrafted in Istanbul</h3>
+        <p>Cast and finished by master goldsmiths in ateliers that have worked gold for generations.</p>
+      </div>
+      <div class="reveal">
+        <div class="glyph">✧</div>
+        <h3>Lifetime Care</h3>
+        <p>Complimentary re-plating and repair, for as long as the piece stays in your family.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BÜLTEN ================= -->
+  <section class="section newsletter">
+    <div class="inner reveal">
+      <span class="eyebrow">Join the Court</span>
+      <h2>Letters from the Atelier</h2>
+      <p>New pieces, archive stories and private previews — a letter or two a month, nothing more.</p>
+      <form onsubmit="return false">
+        <input type="email" placeholder="Your e-mail address" aria-label="E-mail">
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <div class="inner">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <div class="logo"><span class="mark">✦</span> SERAGLIO</div>
+          <p>Ottoman heritage jewelry, handcrafted in Istanbul. Filigree, coin seals and pearls — the court's goldwork, worn today.</p>
+        </div>
+        <div class="foot-col">
+          <h4>Shop</h4>
+          <a href="#">Rings</a>
+          <a href="#">Anklets</a>
+          <a href="#">Necklaces</a>
+          <a href="#">All Jewelry</a>
+        </div>
+        <div class="foot-col">
+          <h4>House</h4>
+          <a href="#heritage">Heritage</a>
+          <a href="#">The Atelier</a>
+          <a href="#">Journal</a>
+          <a href="#">Stockists</a>
+        </div>
+        <div class="foot-col">
+          <h4>Client Care</h4>
+          <a href="#">Shipping &amp; Returns</a>
+          <a href="#">Ring Sizer</a>
+          <a href="#">Jewelry Care</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 Seraglio. All rights reserved.</span>
+        <span>Istanbul · London · New York</span>
+      </div>
+    </div>
+  </footer>
+
+<script>
+  const FRAME_COUNT = 121;
+  const framePath = (i) => `frames/frame_${String(i + 1).padStart(3, "0")}.webp`;
+
+  /* ---------- Ürünler ve nokta konumları ----------
+     keyframes: [kareNo (0 tabanlı), x, y] — x/y video karesine göre oran (0-1).
+     Nokta, kareler arasında doğrusal geçişle kamerayı takip eder. */
+  const PRODUCTS = [
+    {
+      name: "Hurrem's Whisper",
+      price: "$1,240",
+      img: "products/hurrems-whisper.webp",
+      desc: "Hand-pierced filigree crowned with a milk opal, after the palace goldwork of the 16th century.",
+      keyframes: [[0, 0.565, 0.368], [19, 0.601, 0.305], [31, 0.600, 0.160]],
+      visible: [0, 31],
+    },
+    {
+      name: "Bosphorus Twist",
+      price: "$890",
+      img: "products/bosphorus-twist.webp",
+      desc: "A ribbon of solid gold folded like the currents of the strait.",
+      keyframes: [[0, 0.628, 0.408], [19, 0.670, 0.370], [31, 0.688, 0.205]],
+      visible: [0, 31],
+    },
+    {
+      name: "Tughra Seal",
+      price: "$1,480",
+      img: "products/tughra-seal.webp",
+      desc: "An imperial cipher struck in gold, guarded by four Burmese rubies.",
+      keyframes: [[0, 0.705, 0.428], [19, 0.755, 0.390], [31, 0.775, 0.228]],
+      visible: [0, 31],
+    },
+    {
+      name: "Pearl of the Seraglio",
+      price: "$760",
+      img: "products/pearl-of-the-seraglio.webp",
+      desc: "A single Basra pearl seated on a woven curb chain.",
+      keyframes: [[0, 0.792, 0.437], [19, 0.863, 0.390], [31, 0.885, 0.225]],
+      visible: [0, 31],
+    },
+    {
+      name: "Akçe Cascade",
+      price: "$1,150",
+      img: "products/akce-cascade.webp",
+      desc: "Ottoman trade coins and a freshwater pearl strung on a double rope chain.",
+      keyframes: [[102, 0.410, 0.560], [111, 0.427, 0.455], [120, 0.452, 0.374]],
+      visible: [102, 120],
+    },
+  ];
+  const FADE_FRAMES = 5;
+
+  const canvas = document.getElementById("scrubCanvas");
+  const ctx = canvas.getContext("2d");
+  const section = document.getElementById("videoScroll");
+  const sticky = document.getElementById("videoSticky");
+  const loader = document.getElementById("loader");
+  const scrollHint = document.getElementById("scrollHint");
+  const progressBar = document.getElementById("progressBar");
+  const siteHeader = document.getElementById("siteHeader");
+
+  const frames = new Array(FRAME_COUNT);
+  let loadedCount = 0;
+  let targetFrame = 0;
+  let currentFrame = 0;
+  let drawnFrame = -1;
+
+  /* ---------- Hotspot DOM'u oluştur ---------- */
+  const hotspots = PRODUCTS.map((p) => {
+    const el = document.createElement("div");
+    el.className = "hotspot";
+    el.innerHTML = `
+      <button class="dot" aria-label="${p.name}"></button>
+      <div class="card">
+        <img class="photo" src="${p.img}" alt="${p.name}">
+        <div class="body">
+          <div class="kicker">Imperial Collection</div>
+          <h3>${p.name}</h3>
+          <p class="desc">${p.desc}</p>
+          <div class="row">
+            <span class="price">${p.price}</span>
+            <a class="buy" href="#">View</a>
+          </div>
+        </div>
+      </div>`;
+    el.querySelector(".dot").addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".hotspot.active").forEach((h) => {
+        if (h !== el) h.classList.remove("active");
+      });
+      el.classList.toggle("active");
+    });
+    sticky.appendChild(el);
+    return el;
+  });
+
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".hotspot.active").forEach((h) => h.classList.remove("active"));
+  });
+
+  /* ---------- Kareleri önden yükle ---------- */
+  for (let i = 0; i < FRAME_COUNT; i++) {
+    const img = new Image();
+    img.src = framePath(i);
+    img.onload = () => {
+      loadedCount++;
+      if (loadedCount === 1) drawFrame(0);
+      if (loadedCount === FRAME_COUNT) loader.classList.add("hidden");
+    };
+    frames[i] = img;
+  }
+
+  function resizeCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(canvas.clientWidth * dpr);
+    canvas.height = Math.round(canvas.clientHeight * dpr);
+    // Boyut değişince context sıfırlanır; çizim kalitesini tekrar en yükseğe al
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    drawnFrame = -1;
+  }
+
+  function drawFrame(index) {
+    const img = frames[index];
+    if (!img || !img.complete || !img.naturalWidth) return;
+
+    const cw = canvas.width, ch = canvas.height;
+    const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+    drawnFrame = index;
+  }
+
+  /* Video karesindeki oransal noktayı ekran pikseline çevir
+     (canvas "cover" ile kırpıldığı için aynı dönüşüm uygulanır) */
+  function frameToScreen(x, y) {
+    const img = frames[0];
+    const cw = sticky.clientWidth, ch = sticky.clientHeight;
+    if (!img || !img.naturalWidth) return { x: -9999, y: -9999 };
+    const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    return {
+      x: (cw - w) / 2 + x * w,
+      y: (ch - h) / 2 + y * h,
+    };
+  }
+
+  /* Keyframe'ler arasında doğrusal interpolasyon */
+  function positionAt(product, f) {
+    const kfs = product.keyframes;
+    if (f <= kfs[0][0]) return { x: kfs[0][1], y: kfs[0][2] };
+    for (let i = 0; i < kfs.length - 1; i++) {
+      const [f1, x1, y1] = kfs[i];
+      const [f2, x2, y2] = kfs[i + 1];
+      if (f >= f1 && f <= f2) {
+        const t = (f - f1) / (f2 - f1);
+        return { x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t };
+      }
+    }
+    const last = kfs[kfs.length - 1];
+    return { x: last[1], y: last[2] };
+  }
+
+  function updateHotspots(f) {
+    const cw = sticky.clientWidth, ch = sticky.clientHeight;
+
+    PRODUCTS.forEach((p, i) => {
+      const el = hotspots[i];
+      const [start, end] = p.visible;
+
+      let opacity = 0;
+      if (f >= start - FADE_FRAMES && f <= end + FADE_FRAMES) {
+        const fadeIn = start <= 0 ? 1 : Math.min(Math.max((f - start) / FADE_FRAMES + 1, 0), 1);
+        const fadeOut = end >= FRAME_COUNT - 2 ? 1 : Math.min(Math.max((end - f) / FADE_FRAMES + 1, 0), 1);
+        opacity = Math.max(0, Math.min(fadeIn, fadeOut));
+      }
+
+      el.style.opacity = opacity;
+      el.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
+      if (opacity === 0) {
+        el.classList.remove("active");
+        return;
+      }
+
+      const pos = positionAt(p, f);
+      const s = frameToScreen(pos.x, pos.y);
+      el.style.left = s.x + "px";
+      el.style.top = s.y + "px";
+
+      el.classList.toggle("below", s.y < ch * 0.45);
+      el.classList.toggle("shift-left", s.x > cw - 150);
+      el.classList.toggle("shift-right", s.x < 150);
+    });
+  }
+
+  function onScroll() {
+    const rect = section.getBoundingClientRect();
+    const scrollable = rect.height - window.innerHeight;
+    const progress = Math.min(Math.max(-rect.top / scrollable, 0), 1);
+
+    targetFrame = progress * (FRAME_COUNT - 1);
+
+    scrollHint.style.opacity = Math.max(1 - progress * 8, 0);
+    progressBar.style.transform = `scaleX(${progress})`;
+
+    siteHeader.classList.toggle("scrolled", window.scrollY > 60);
+  }
+
+  function tick() {
+    currentFrame += (targetFrame - currentFrame) * 0.22;
+    const index = Math.round(currentFrame);
+    if (index !== drawnFrame) drawFrame(index);
+    updateHotspots(currentFrame);
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", () => { resizeCanvas(); onScroll(); });
+
+  resizeCanvas();
+  onScroll();
+  requestAnimationFrame(tick);
+
+  /* ---------- Ürün vitrini ---------- */
+  document.getElementById("productsGrid").innerHTML = PRODUCTS
+    .map((p, i) => `
+      <a class="product reveal" href="#" style="transition-delay:${i * 70}ms">
+        <div class="frame"><img src="${p.img}" alt="${p.name}" loading="lazy"></div>
+        <div class="p-name">${p.name}</div>
+        <div class="p-price">${p.price}</div>
+      </a>`)
+    .join("");
+
+  /* ---------- Kaydırınca beliren bölümler ---------- */
+  const observer = new IntersectionObserver(
+    (entries) => entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add("in");
+        observer.unobserve(e.target);
+      }
+    }),
+    { threshold: 0.15 }
+  );
+  document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+</script>
+
+</body>
+</html>
