@@ -72,6 +72,38 @@
   }
 
   .nav-links { display: flex; gap: 28px; }
+  .nav-right { display: flex; justify-content: flex-end; }
+
+  .nav-right .bag-btn,
+  .sidebar-links .aux .bag-btn {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    position: relative;
+    padding-bottom: 3px;
+  }
+
+  .nav-right .bag-btn::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .nav-right .bag-btn:hover::after { transform: scaleX(1); }
+
+  .sidebar-links .aux .bag-btn {
+    text-align: left;
+    color: var(--muted);
+    padding: 11px 0;
+  }
   .nav-links.right { justify-content: flex-end; }
 
   .nav-links a {
@@ -741,6 +773,259 @@
     .detail-hint { display: none; }
   }
 
+  /* ================= STOK DURUMU ================= */
+  .add-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 11px 14px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: var(--ink);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .add-btn:hover { background: var(--gold); border-color: var(--gold); }
+  .add-btn.added { background: var(--gold); border-color: var(--gold); }
+
+  .sold {
+    display: block;
+    margin-top: 12px;
+    padding: 11px 14px;
+    border: 1px solid rgba(28, 26, 23, 0.18);
+    border-radius: 999px;
+    text-align: center;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(28, 26, 23, 0.42);
+  }
+
+  /* Stokta olmayan parça soluk görünür */
+  .product.sold-out .frame img { opacity: 0.55; filter: saturate(0.55); }
+  .product.sold-out .p-name,
+  .product.sold-out .p-price { color: rgba(28, 26, 23, 0.45); }
+  .product .p-link { display: block; }
+
+  /* Nokta kartındaki satır: fiyat + eylem */
+  .card .row.stacked { display: block; }
+  .card .row.stacked .price { display: block; margin-bottom: 4px; }
+  .card .row .add-btn,
+  .card .row .sold { margin-top: 8px; }
+
+  /* Detay filmindeki ekle düğmesi (panel pointer-events: none) */
+  .detail-info .add-btn,
+  .detail-info .sold {
+    pointer-events: auto;
+    width: auto;
+    min-width: 190px;
+    margin-top: 14px;
+  }
+
+  /* ================= SEPET ÇEKMECESİ ================= */
+  .bag-btn {
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    letter-spacing: inherit;
+  }
+
+  .bag-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 26, 23, 0.38);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s;
+    z-index: 44;
+  }
+
+  .bag-backdrop.open { opacity: 1; visibility: visible; }
+
+  .bag-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(390px, 88vw);
+    background: var(--bg);
+    border-left: 1px solid var(--gold-soft);
+    z-index: 45;
+    transform: translateX(100%);
+    transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bag-drawer.open { transform: translateX(0); }
+
+  .bag-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 26px 18px;
+    border-bottom: 1px solid rgba(176, 138, 53, 0.22);
+  }
+
+  .bag-head h2 {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+
+  .bag-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.05rem;
+    color: var(--muted);
+    padding: 10px;
+    margin-right: -10px;
+  }
+
+  .bag-close:hover { color: var(--ink); }
+
+  .bag-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 26px;
+  }
+
+  .bag-empty {
+    padding: 48px 0;
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .bag-line {
+    display: flex;
+    gap: 14px;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(176, 138, 53, 0.16);
+  }
+
+  .bag-line img {
+    width: 66px;
+    height: 66px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(176, 138, 53, 0.25);
+    background: #fff;
+    flex: none;
+  }
+
+  .bag-line .info { flex: 1; min-width: 0; }
+
+  .bag-line .name {
+    font-family: var(--serif);
+    font-size: 0.98rem;
+    margin-bottom: 3px;
+  }
+
+  .bag-line .unit {
+    font-size: 0.74rem;
+    color: var(--muted);
+    margin-bottom: 9px;
+  }
+
+  .bag-qty { display: flex; align-items: center; gap: 10px; }
+
+  .bag-qty button {
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--gold-soft);
+    border-radius: 50%;
+    background: none;
+    color: var(--ink);
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .bag-qty button:hover { border-color: var(--gold); color: var(--gold); }
+  .bag-qty .n { font-size: 0.82rem; min-width: 14px; text-align: center; }
+
+  .bag-line .remove {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: auto;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    align-self: flex-start;
+  }
+
+  .bag-line .remove:hover { color: var(--gold); }
+
+  .bag-foot {
+    padding: 20px 26px 26px;
+    border-top: 1px solid rgba(176, 138, 53, 0.22);
+  }
+
+  .bag-total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .bag-total .label {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .bag-total .sum { font-family: var(--serif); font-size: 1.3rem; }
+
+  .bag-note {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .bag-checkout {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: var(--ink);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .bag-checkout:disabled {
+    background: none;
+    color: rgba(28, 26, 23, 0.35);
+    border-color: rgba(28, 26, 23, 0.18);
+    cursor: default;
+  }
+
+  .bag-msg {
+    margin-top: 12px;
+    font-size: 0.72rem;
+    color: var(--gold);
+    text-align: center;
+    min-height: 1em;
+  }
+
   .section { padding: 110px 40px; }
   .section .inner { max-width: 1140px; margin: 0 auto; }
 
@@ -1101,11 +1386,9 @@
         </nav>
       </div>
       <a class="logo" href="#"><span class="mark">✦</span> SERAGLIO</a>
-      <nav class="nav-links right">
-        <a href="#">Search</a>
-        <a href="#">Account</a>
-        <a href="#">Bag (0)</a>
-      </nav>
+      <div class="nav-right">
+        <button class="bag-btn" type="button" aria-label="Open bag">Bag (<span class="bag-count">0</span>)</button>
+      </div>
     </div>
   </header>
 
@@ -1121,9 +1404,7 @@
       <a href="#heritage">Heritage</a>
       <a href="#">Journal</a>
       <div class="aux">
-        <a href="#">Search</a>
-        <a href="#">Account</a>
-        <a href="#">Bag (0)</a>
+        <button class="bag-btn" type="button">Bag (<span class="bag-count">0</span>)</button>
       </div>
     </nav>
   </aside>
@@ -1257,6 +1538,25 @@
     </div>
   </footer>
 
+  <!-- ================= SEPET ÇEKMECESİ ================= -->
+  <div class="bag-backdrop" id="bagBackdrop"></div>
+  <aside class="bag-drawer" id="bagDrawer" aria-hidden="true" aria-label="Shopping bag">
+    <div class="bag-head">
+      <h2>Your Bag</h2>
+      <button class="bag-close" id="bagClose" aria-label="Close bag">&#10005;</button>
+    </div>
+    <div class="bag-items" id="bagItems"></div>
+    <div class="bag-foot">
+      <div class="bag-total">
+        <span class="label">Subtotal</span>
+        <span class="sum" id="bagTotal">$0</span>
+      </div>
+      <p class="bag-note">Taxes and shipping calculated at checkout.</p>
+      <button class="bag-checkout" id="bagCheckout" disabled>Checkout</button>
+      <p class="bag-msg" id="bagMsg"></p>
+    </div>
+  </aside>
+
   <!-- ================= ÜRÜN DETAY MODALI ================= -->
   <div class="detail-modal" id="detailModal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Product detail film">
     <div class="detail-scroll" id="detailScroll">
@@ -1273,6 +1573,7 @@
             <h3 id="detailTitle"></h3>
             <p class="desc" id="detailDesc"></p>
             <div class="price" id="detailPrice"></div>
+            <div class="detail-action" id="detailAction"></div>
           </div>
 
           <div class="detail-variants" id="detailVariants"></div>
@@ -1294,6 +1595,7 @@
   const PRODUCTS = [
     {
       name: "Hurrem's Whisper",
+      inStock: true,
       price: "$1,240",
       img: "products/hurrems-whisper.webp",
       desc: "Hand-pierced filigree crowned with a milk opal, after the palace goldwork of the 16th century.",
@@ -1317,6 +1619,7 @@
     },
     {
       name: "Bosphorus Twist",
+      inStock: false,
       price: "$890",
       img: "products/bosphorus-twist.webp",
       desc: "A ribbon of solid gold folded like the currents of the strait.",
@@ -1325,6 +1628,7 @@
     },
     {
       name: "Tughra Seal",
+      inStock: false,
       price: "$1,480",
       img: "products/tughra-seal.webp",
       desc: "An imperial cipher struck in gold, guarded by four Burmese rubies.",
@@ -1333,6 +1637,7 @@
     },
     {
       name: "Pearl of the Seraglio",
+      inStock: false,
       price: "$760",
       img: "products/pearl-of-the-seraglio.webp",
       desc: "A single Basra pearl seated on a woven curb chain.",
@@ -1341,6 +1646,7 @@
     },
     {
       name: "Akçe Cascade",
+      inStock: false,
       price: "$1,150",
       img: "products/akce-cascade.webp",
       desc: "Ottoman trade coins and a freshwater pearl strung on a double rope chain.",
@@ -1371,7 +1677,7 @@
   const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
   /* ---------- Hotspot DOM'u oluştur ---------- */
-  const hotspots = PRODUCTS.map((p) => {
+  const hotspots = PRODUCTS.map((p, i) => {
     const el = document.createElement("div");
     el.className = "hotspot";
     el.innerHTML = `
@@ -1387,9 +1693,11 @@
           <div class="kicker">Imperial Collection</div>
           <h3>${p.name}</h3>
           <p class="desc">${p.desc}</p>
-          <div class="row">
+          <div class="row stacked">
             <span class="price">${p.price}</span>
-            <a class="buy" href="#">View</a>
+            ${p.inStock
+              ? `<button class="add-btn" type="button" data-index="${i}">Add to bag</button>`
+              : `<span class="sold">Out of stock</span>`}
           </div>
         </div>
       </div>`;
@@ -1598,14 +1906,19 @@
   /* ---------- Ürün vitrini ---------- */
   document.getElementById("productsGrid").innerHTML = PRODUCTS
     .map((p, i) => `
-      <a class="product reveal${p.detail ? " has-detail" : ""}" href="#" data-index="${i}" style="transition-delay:${i * 70}ms">
-        <div class="frame">
-          <img src="${p.img}" alt="${p.name}" loading="lazy">
-          ${p.detail ? `<span class="detail-badge">Watch in detail</span>` : ""}
-        </div>
-        <div class="p-name">${p.name}</div>
-        <div class="p-price">${p.price}</div>
-      </a>`)
+      <div class="product reveal${p.inStock ? "" : " sold-out"}" style="transition-delay:${i * 70}ms">
+        <a class="p-link${p.detail ? " has-detail" : ""}" href="#" data-index="${i}">
+          <div class="frame">
+            <img src="${p.img}" alt="${p.name}" loading="lazy">
+            ${p.detail ? `<span class="detail-badge">Watch in detail</span>` : ""}
+          </div>
+          <div class="p-name">${p.name}</div>
+          <div class="p-price">${p.price}</div>
+        </a>
+        ${p.inStock
+          ? `<button class="add-btn" type="button" data-index="${i}">Add to bag</button>`
+          : `<span class="sold">Out of stock</span>`}
+      </div>`)
     .join("");
 
   /* ---------- Mobil menü ---------- */
@@ -1629,6 +1942,150 @@
   menuBackdrop.addEventListener("click", () => setMenu(false));
   document.getElementById("sidebarClose").addEventListener("click", () => setMenu(false));
   sidebarEl.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
+
+
+  /* ================= SEPET =================
+     Basit bir alışveriş çantası: ürün adına göre adet tutar, tarayıcı
+     belleğinde (localStorage) saklanır ki sayfa yenilenince kaybolmasın. */
+  const BAG_KEY = "seraglio-bag";
+
+  const bagBtns     = document.querySelectorAll(".bag-btn");
+  const bagCounts   = document.querySelectorAll(".bag-count");
+  const bagDrawer   = document.getElementById("bagDrawer");
+  const bagBackdrop = document.getElementById("bagBackdrop");
+  const bagClose    = document.getElementById("bagClose");
+  const bagItems    = document.getElementById("bagItems");
+  const bagTotal    = document.getElementById("bagTotal");
+  const bagCheckout = document.getElementById("bagCheckout");
+  const bagMsg      = document.getElementById("bagMsg");
+
+  const priceOf = (p) => Number(p.price.replace(/[$,]/g, "")) || 0;
+  const money = (n) => "$" + n.toLocaleString("en-US");
+
+  function loadBag() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(BAG_KEY) || "{}");
+      const clean = {};
+      // Sadece hâlâ var olan ve stokta olan parçalar geri yüklenir
+      PRODUCTS.forEach((p) => {
+        const q = Math.floor(Number(raw[p.name]) || 0);
+        if (p.inStock && q > 0) clean[p.name] = Math.min(q, 99);
+      });
+      return clean;
+    } catch (e) {
+      return {};
+    }
+  }
+
+  let bag = loadBag();
+
+  function saveBag() {
+    try { localStorage.setItem(BAG_KEY, JSON.stringify(bag)); } catch (e) { /* özel mod */ }
+  }
+
+  function bagCount() {
+    return Object.values(bag).reduce((a, b) => a + b, 0);
+  }
+
+  function renderBag() {
+    const names = Object.keys(bag);
+    bagCounts.forEach((el) => { el.textContent = bagCount(); });
+
+    if (!names.length) {
+      bagItems.innerHTML = `<p class="bag-empty">Your bag is empty.</p>`;
+      bagTotal.textContent = money(0);
+      bagCheckout.disabled = true;
+      return;
+    }
+
+    let total = 0;
+    bagItems.innerHTML = names.map((name) => {
+      const p = PRODUCTS.find((x) => x.name === name);
+      if (!p) return "";
+      const qty = bag[name];
+      total += priceOf(p) * qty;
+      return `
+        <div class="bag-line">
+          <img src="${p.img}" alt="${p.name}">
+          <div class="info">
+            <div class="name">${p.name}</div>
+            <div class="unit">${p.price} each</div>
+            <div class="bag-qty">
+              <button type="button" data-act="dec" data-name="${p.name}" aria-label="Decrease quantity">&#8722;</button>
+              <span class="n">${qty}</span>
+              <button type="button" data-act="inc" data-name="${p.name}" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+          <button class="remove" type="button" data-act="del" data-name="${p.name}">Remove</button>
+        </div>`;
+    }).join("");
+
+    bagTotal.textContent = money(total);
+    bagCheckout.disabled = false;
+  }
+
+  function addToBag(product) {
+    if (!product.inStock) return;
+    bag[product.name] = Math.min((bag[product.name] || 0) + 1, 99);
+    saveBag();
+    renderBag();
+    setBag(true);
+  }
+
+  function setBag(open) {
+    bagDrawer.classList.toggle("open", open);
+    bagBackdrop.classList.toggle("open", open);
+    bagDrawer.setAttribute("aria-hidden", String(!open));
+    if (!open) bagMsg.textContent = "";
+    // Detay filmi açıkken sayfa kilidi zaten var; onu bozma
+    if (!dOpen) document.body.style.overflow = open ? "hidden" : "";
+  }
+
+  bagBtns.forEach((b) => b.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setBag(!bagDrawer.classList.contains("open"));
+  }));
+  bagBackdrop.addEventListener("click", () => setBag(false));
+  bagClose.addEventListener("click", () => setBag(false));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && bagDrawer.classList.contains("open")) setBag(false);
+  });
+
+  bagItems.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-act]");
+    if (!btn) return;
+    const name = btn.dataset.name;
+    if (btn.dataset.act === "inc") bag[name] = Math.min((bag[name] || 0) + 1, 99);
+    if (btn.dataset.act === "dec") bag[name] = (bag[name] || 0) - 1;
+    if (btn.dataset.act === "del") bag[name] = 0;
+    if (bag[name] <= 0) delete bag[name];
+    saveBag();
+    renderBag();
+  });
+
+  bagCheckout.addEventListener("click", () => {
+    bagMsg.textContent = "Checkout is not connected in this demo.";
+  });
+
+  /* "Add to bag" düğmeleri — vitrin, nokta kartı ve detay filmi */
+  function wireAddButtons(root) {
+    root.querySelectorAll(".add-btn[data-index]").forEach((btn) => {
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = "1";
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        addToBag(PRODUCTS[Number(btn.dataset.index)]);
+        btn.classList.add("added");
+        btn.textContent = "Added";
+        setTimeout(() => { btn.classList.remove("added"); btn.textContent = "Add to bag"; }, 1400);
+      });
+    });
+  }
+
+  wireAddButtons(document);
+  renderBag();
 
   /* ---------- Kaydırınca beliren bölümler ---------- */
   const observer = new IntersectionObserver(
@@ -1659,6 +2116,7 @@
   const detailTitle    = document.getElementById("detailTitle");
   const detailDesc     = document.getElementById("detailDesc");
   const detailPrice    = document.getElementById("detailPrice");
+  const detailAction   = document.getElementById("detailAction");
 
   const D_LOADER_MIN = 14;
   const variantCache = new Map();   // dir -> { images, loaded }
@@ -1782,8 +2240,8 @@
     dRaf = requestAnimationFrame(dTick);
   }
 
-  /* Varyant değişimi: kaydırma konumu korunur, kare sayısı farklı olsa da
-     aynı orana denk gelen kareden devam edilir. */
+  /* Varyant değişimi: hangi taşa geçilirse geçilsin film baştan başlar,
+     kaydırma en üste döner. */
   function setVariant(v) {
     dVariant = v;
     const st = loadVariant(v);
@@ -1793,10 +2251,15 @@
       detailLoader.classList.add("hidden");
     }
 
-    dTarget = dProgress() * (v.count - 1);
-    dCurrent = dTarget;
+    // Kaydırma zaten 0 ise scroll olayı tetiklenmez; gösterge elle sıfırlanır.
+    detailScroll.scrollTop = 0;
+    detailProgress.style.transform = "scaleX(0)";
+    detailHint.style.opacity = 1;
+
+    dTarget = 0;
+    dCurrent = 0;
     dDrawn = -1;
-    dDraw(Math.round(dCurrent));
+    dDraw(0);
 
     detailVariants.querySelectorAll(".chip").forEach((c) => {
       c.classList.toggle("active", c.dataset.dir === v.dir);
@@ -1812,6 +2275,12 @@
     detailTitle.textContent  = product.name;
     detailDesc.textContent   = d.desc || product.desc;
     detailPrice.textContent  = product.price;
+
+    const pIndex = PRODUCTS.indexOf(product);
+    detailAction.innerHTML = product.inStock
+      ? `<button class="add-btn" type="button" data-index="${pIndex}">Add to bag</button>`
+      : `<span class="sold">Out of stock</span>`;
+    wireAddButtons(detailAction);
 
     detailVariants.innerHTML = d.variants
       .map((v) => `<button class="chip" type="button" data-dir="${v.dir}" aria-pressed="false">${v.label}</button>`)
@@ -1831,12 +2300,9 @@
     dCurrent = 0;
     dTarget = 0;
 
-    // Modal görünür olduktan sonra canvas gerçek ölçüsünü alır
-    requestAnimationFrame(() => {
-      dResize();
-      setVariant(d.variants[0]);
-      onDetailScroll();
-    });
+    dResize();
+    setVariant(d.variants[0]);
+    onDetailScroll();
 
     cancelAnimationFrame(dRaf);
     dRaf = requestAnimationFrame(dTick);
@@ -1864,10 +2330,10 @@
   });
 
   /* Ürün vitrinindeki fotoğraftan detay filmini aç */
-  document.querySelectorAll("#productsGrid .product.has-detail").forEach((a) => {
+  document.querySelectorAll("#productsGrid .p-link").forEach((a) => {
     a.addEventListener("click", (e) => {
-      e.preventDefault();
-      openDetail(PRODUCTS[Number(a.dataset.index)]);
+      e.preventDefault();   // href="#" sayfayı en üste atmasın
+      if (a.classList.contains("has-detail")) openDetail(PRODUCTS[Number(a.dataset.index)]);
     });
   });
 
