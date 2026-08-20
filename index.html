@@ -809,6 +809,7 @@
   .product:hover { transform: translateY(-6px); }
 
   .product .frame {
+    position: relative;
     background: #fff;
     border: 1px solid rgba(176, 138, 53, 0.22);
     border-radius: 10px;
@@ -818,6 +819,31 @@
   }
 
   .product:hover .frame { box-shadow: 0 18px 40px rgba(28, 26, 23, 0.12); }
+
+  /* Detay filmi olan parcalarda tiklanabilirlik ipucu */
+  .product .detail-badge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 26px 10px 10px;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #fff;
+    text-align: center;
+    background: linear-gradient(to top, rgba(20, 17, 12, 0.62), rgba(20, 17, 12, 0));
+    opacity: 0.92;
+    transition: opacity 0.25s ease, background 0.25s ease;
+  }
+
+  .product:hover .detail-badge {
+    opacity: 1;
+    background: linear-gradient(to top, rgba(20, 17, 12, 0.8), rgba(20, 17, 12, 0));
+  }
+
+  .product.has-detail { cursor: zoom-in; }
 
   .product img {
     display: block;
@@ -1339,6 +1365,11 @@
   let currentFrame = 0;
   let drawnFrame = -1;
 
+  /* Fareyle açılan kart kalıcıdır; bu yüzden yalnızca gerçek fare
+     hareketiyle açılmalı. Dokunmatikte mouseenter tıklamayla birlikte
+     gelir, kayarken de imleç sabitken noktalar altından geçebilir. */
+  const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
   /* ---------- Hotspot DOM'u oluştur ---------- */
   const hotspots = PRODUCTS.map((p) => {
     const el = document.createElement("div");
@@ -1362,6 +1393,17 @@
           </div>
         </div>
       </div>`;
+    el.addEventListener("mousemove", () => {
+      if (!canHover || el.classList.contains("active")) return;
+      document.querySelectorAll(".hotspot.active").forEach((h) => {
+        if (h !== el) h.classList.remove("active");
+      });
+      el.classList.add("active");
+    }, { passive: true });
+
+    // Kartin kendi icine yapilan tiklama "baska bir yer" sayilmaz
+    el.querySelector(".card").addEventListener("click", (e) => e.stopPropagation());
+
     el.querySelector(".dot").addEventListener("click", (e) => {
       e.stopPropagation();
       document.querySelectorAll(".hotspot.active").forEach((h) => {
@@ -1556,8 +1598,11 @@
   /* ---------- Ürün vitrini ---------- */
   document.getElementById("productsGrid").innerHTML = PRODUCTS
     .map((p, i) => `
-      <a class="product reveal" href="#" style="transition-delay:${i * 70}ms">
-        <div class="frame"><img src="${p.img}" alt="${p.name}" loading="lazy"></div>
+      <a class="product reveal${p.detail ? " has-detail" : ""}" href="#" data-index="${i}" style="transition-delay:${i * 70}ms">
+        <div class="frame">
+          <img src="${p.img}" alt="${p.name}" loading="lazy">
+          ${p.detail ? `<span class="detail-badge">Watch in detail</span>` : ""}
+        </div>
         <div class="p-name">${p.name}</div>
         <div class="p-price">${p.price}</div>
       </a>`)
@@ -1816,6 +1861,14 @@
   });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeDetail();
+  });
+
+  /* Ürün vitrinindeki fotoğraftan detay filmini aç */
+  document.querySelectorAll("#productsGrid .product.has-detail").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      openDetail(PRODUCTS[Number(a.dataset.index)]);
+    });
   });
 
   /* Kart fotoğrafından detay filmini aç */
